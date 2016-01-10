@@ -1,12 +1,13 @@
 {
   "name": "paper-list-item",
-  "version": "0.1.0_alpha",
+  "version": "0.1.0",
   "authors": [
     "Glenn Vandeuren <VandeurenGlenn@gmail.com>"
   ],
   "description": "An element providing a list-item  'à la material design'.",
   "keywords": [
     "web-component",
+    "web-components",
     "polymer",
     "seed"
   ],
@@ -22,7 +23,7 @@
     "iron-flex-layout": "polymerelements/iron-flex-layout#~1.2.2",
     "iron-media-query": "PolymerElements/iron-media-query#~1.0.8",
     "iron-resizable-behavior": "PolymerElements/iron-resizable-behavior#~1.0.2",
-    "iron-overlay-behavior": "PolymerElements/iron-overlay-behavior#~1.1.2"
+    "paper-styles": "PolymerElements/paper-styles#~1.1.2"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

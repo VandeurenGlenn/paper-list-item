@@ -6,9 +6,9 @@ Copyright (c) 2016 Glenn Vandeuren. All rights reserved.
 <link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../iron-media-query/iron-media-query.html">
 <link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
-<link rel="import" href="../iron-overlay-behavior/iron-overlay-behavior.html">
 <link rel="import" href="../iron-icon/iron-icon.html">
 <link rel="import" href="paper-list-item-icons.html">
+<link rel="import" href="../paper-styles/typography.html">
 
 <!--
 An element providing a list-item  'à la material design'.
@@ -27,6 +27,11 @@ Example:
   <template>
     <style>
       :host {
+        min-width: 300px;
+        max-width: 1200px;
+      }
+
+      :host #hero {
         background: #FFF;
         box-sizing: border-box;
         box-shadow: 0 -1px 0 #e5e5e5,0 0 2px rgba(0,0,0,.12),0 2px 4px rgba(0,0,0,.24);
@@ -35,8 +40,6 @@ Example:
         margin: 1px 0;
         outline: none;
         will-change: transform,-webkit-transform;
-        min-width: 300px;
-        max-width: 1200px;
       }
 
       :host:not(opened) {
@@ -46,11 +49,6 @@ Example:
        :host, :host[large-screen] .layout-wrapper {
         @apply(--layout-horizontal);
         @apply(--layout-center);
-      }
-
-      :host[dropdown-opened] {
-        @apply(--layout-vertical);
-        width: 100%;
       }
 
       .horizontal {
@@ -95,10 +93,11 @@ Example:
       }
 
       span.title {
+        @apply(--paper-font-common-base);
         display: inline-block;
         width: 184px;
+        font-size: 81,25%;
         /*@apply(--paper-font-common);*/
-        font-weight: 800;
         color: #212121;
       }
 
@@ -109,18 +108,16 @@ Example:
       }
 
       span.text {
+        @apply(--paper-font-common-nowrap);
         @apply(--layout-flex);
         min-width: 0;
         width: 0;
         color: #212121;
-        font-weight: 800;
-        overflow: hidden;
+        font-size: 81,25%;
         word-wrap: break-word;
-        text-overflow: ellipsis;
-        white-space: nowrap;
       }
 
-      :host[dropdown-opened] .dropdown-content-container span.text {
+      :host[opened] .dropdown-content-container span.text {
         white-space: normal;
       }
 
@@ -139,75 +136,72 @@ Example:
         @apply(--layout-flex);
       }
 
-      :host:not([dropdown-opened]) .overlay {
-        visibility: hidden;
-      }
-
-      /*:host[dropdown-opened] .overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;
-        background: rgba(0, 0, 0, .24);
-        visibility: visible;
-      }*/
-
       .ib {
         display: inline-block;
       }
 
       .dropdown-content-container {
         padding: 16px 16px 24px 72px;
+        box-sizing: border-box;
       }
 
       .border {
         width: 100%;
         border-bottom: 1px solid rgba(0,0,0,.24);
       }
+
+      div.sub-title {
+        @apply(--paper-font-subhead);
+        padding: 16px 0;
+      }
     </style>
     <iron-media-query query="[[query]]" query-matches="{{largeScreen}}"></iron-media-query>
-    <div class="overlay"></div>
 
     <!-- TODO: add second row and ripple animations -->
     <!-- <div class="icon-wrapper"> -->
     <!-- </div> -->
-    <div class="horizontal header-container">
-      <iron-icon id="icon" icon="[[icon]]" src="[[src]]"></iron-icon>
-      <div class="layout-wrapper">
-        <span class="title">[[title]]</span>
-        <div class="text-wrapper">
-          <template is="dom-if" if="[[_computeSubTitle(subTitle, _subTitle, dropdown, dropdownOpened, domIf)]]">
-            <span class="text" title="[[_computeTitle(title, _ellipsedText)]]">[[_computeSubTitle(subTitle, _subTitle, dropdown)]]</span>
+    <div class=""  id="hero">
+      <div class="horizontal header-container">
+        <iron-icon id="icon" icon="[[icon]]" src="[[src]]"></iron-icon>
+        <div class="layout-wrapper">
+          <span class="title">[[title]]</span>
+          <template is="dom-if" if="[[_computeSubTitle(subTitle, _subTitle, dropdown, opened, domIf)]]">
+            <div class="text-wrapper">
+              <span class="text" title="[[_computeTitle(title, _ellipsedText)]]">[[_computeSubTitle(subTitle, _subTitle, dropdown)]]</span>
+            </div>
           </template>
+        </div>
+
+        <template is="dom-if" if="[[dropdown]]" restamp="[[restamp]]">
+          <iron-icon icon="paper-list-item-icons:arrow-drop-down" hidden$="[[_computeDropDown(opened, dropdown)]]" class="dropdown-trigger"></iron-icon>
+          <iron-icon icon="paper-list-item-icons:arrow-drop-up" hidden$="[[_computeDropUp(opened, dropdown)]]" class="dropdown-trigger"></iron-icon>
+        </template>
+        <!-- <span class="flex"></span> -->
+        <div class="buttons-wrapper">
+          <content select=".buttons"></content>
         </div>
       </div>
 
-      <template is="dom-if" if="[[dropdown]]" restamp="[[restamp]]">
-        <iron-icon icon="paper-list-item-icons:arrow-drop-down" hidden$="[[_computeDropDown(dropdownOpened, dropdown)]]" class="dropdown-trigger"></iron-icon>
-        <iron-icon icon="paper-list-item-icons:arrow-drop-up" hidden$="[[_computeDropUp(dropdownOpened, dropdown)]]" class="dropdown-trigger"></iron-icon>
-      </template>
-      <!-- <span class="flex"></span> -->
-      <div class="buttons-wrapper">
-        <content select=".buttons"></content>
-      </div>
-    </div>
 
-
-    <template is="dom-if" if="[[_computeDropDownOpened(dropdownOpened, dropdown)]]">
-      <div class="vertical">
-        <div class="border"></div>
-        <div class="dropdown-content-container">
-          <div class="layout-wrapper">
-            <content select=".dropdown-content"></content>
-            <div class="text-wrapper">
-              <span class="text">[[text]]</span>
+      <template is="dom-if" if="[[_computeDropDownOpened(opened, dropdown)]]">
+        <div class="vertical">
+          <div class="border"></div>
+          <div class="dropdown-content-container">
+            <template is="dom-if" if="[[_computeSubTitle(subTitle, _subTitle, dropdown, opened)]]" restamp="[[restamp]]">
+              <div class="sub-title">[[_computeSubTitle(subTitle, _subTitle, dropdown, opened)]]</div>
+            </template>
+            <div class="layout-wrapper">
+              <content select=".dropdown-content"></content>
+              <div class="text-wrapper">
+                <span class="text">[[text]]</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-    </template>
+      </template>
+    </div>
+
     <!-- <template is="dom-if" if="[[_computeExtraImages(images)]]" restamp="[[restamp]]">
       <content select=".second-row"></content>
     </template> -->
@@ -220,7 +214,7 @@ Example:
   Polymer({
 
     is: 'paper-list-item',
-    behaviors: [Polymer.IronResizableBehavior, Polymer.IronOverlayBehavior],
+    behaviors: [Polymer.IronResizableBehavior],
 
     properties: {
 
@@ -291,12 +285,6 @@ Example:
         value: false
       },
 
-      dropdownOpened: {
-        type: Boolean,
-        reflectToAttribute: true,
-        value: false
-      },
-
       dropdown: {
         type: Boolean,
         value: false
@@ -350,7 +338,6 @@ Example:
           };
         }
       }
-
     },
 
     listeners: {
@@ -383,12 +370,14 @@ Example:
 
     _tapHandler: function(event) {
       var rootTarget = Polymer.dom(event).rootTarget;
+      var localTarget = Polymer.dom(event).localTarget;
       var hasDropdownTrigger = rootTarget.classList.contains(this.dropdownTrigger);
       var hasButtonTrigger = rootTarget.classList.contains(this.buttonTrigger);
-      if (this.withBackdrop && !hasDropdownTrigger && !hasButtonTrigger) {
+      var hasOpenTrigger = localTarget.classList.contains(this.openTrigger.value);
+      if (this.withBackdrop && hasOpenTrigger && !hasDropdownTrigger && !hasButtonTrigger) {
         this.toggleOpened();
       } else if (this.dropdown && hasDropdownTrigger && !hasButtonTrigger) {
-        this.toggleDropdown();
+        this.toggleOpened();
       }
     },
 
@@ -413,11 +402,8 @@ Example:
       }
     },
 
-    toggleDropdown: function() {
-      this.dropdownOpened = !this.dropdownOpened;
-    },
-
     toggleOpened: function() {
+      this.classList.toggle('list-item-opened');
       this.opened = !this.opened;
     },
 
@@ -455,9 +441,13 @@ Example:
       return title;
     },
 
-    _computeSubTitle: function(subTitle, _subTitle, dropdown, dropdownOpened, domIf) {
+    _computeSubTitle: function(subTitle, _subTitle, dropdown, opened, domIf) {
       var i = domIf ? domIf : false;
-      if (i && dropdown && _subTitle && dropdownOpened) {
+      if (i && dropdown && !opened) {
+        return true;
+      } else if (i && dropdown && opened) {
+        return false;
+      } else if (_subTitle && dropdown && opened) {
         return false;
       } else {
         return subTitle ? subTitle : _subTitle;

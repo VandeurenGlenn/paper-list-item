@@ -10,6 +10,7 @@ Copyright (c) 2015 Glenn Vandeuren. All rights reserved.
     <title>paper-list-item Demo</title>
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="../paper-list-item.html">
+    <link rel="import" href="animated-list.html">
   </head>
   <body unresolved>
 
@@ -28,6 +29,22 @@ Copyright (c) 2015 Glenn Vandeuren. All rights reserved.
     </paper-list-item>
 
     <paper-list-item title="item 2" text="text text text text text texttexttexttexttexttexttexttexttext text text text text text texttexttexttexttexttexttexttexttext text text text text text texttexttexttexttexttexttexttexttext"></paper-list-item>
+
+    <animated-list>
+      <paper-list-item title="item 1" text="some text here" icon="">
+        <div class="buttons">
+          <button type="button" name="ok" list-item-button>Ok</button>
+        </div>
+      </paper-list-item>
+
+      <paper-list-item title="item 2" text="some text here too" sub-title="more" with-backdrop>
+        <div class="buttons">
+          <button type="button" name="ok" list-item-button>Ok</button>
+        </div>
+      </paper-list-item>
+
+      <paper-list-item title="item 2" text="text text text text text texttexttexttexttexttexttexttexttext text text text text text texttexttexttexttexttexttexttexttext text text text text text texttexttexttexttexttexttexttexttext"></paper-list-item>
+    </animated-list>
 
   </body>
 
