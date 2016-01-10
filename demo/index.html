@@ -1,0 +1,37 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2015 Glenn Vandeuren. All rights reserved.
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <title>paper-list-item Demo</title>
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="../paper-list-item.html">
+  </head>
+  <body unresolved>
+
+    <p>An example of <code>&lt;paper-list-item&gt;</code>:</p>
+
+    <paper-list-item title="item 1" text="some text here" icon="">
+      <div class="buttons">
+        <button type="button" name="ok" list-item-button>Ok</button>
+      </div>
+    </paper-list-item>
+
+    <paper-list-item title="item 2" text="some text here too" sub-title="more" with-backdrop>
+      <div class="buttons">
+        <button type="button" name="ok" list-item-button>Ok</button>
+      </div>
+    </paper-list-item>
+
+    <paper-list-item title="item 2" text="text text text text text texttexttexttexttexttexttexttexttext text text text text text texttexttexttexttexttexttexttexttext text text text text text texttexttexttexttexttexttexttexttext"></paper-list-item>
+
+  </body>
+
+  <script>
+    var elements = document.querySelectorAll('paper-list-item');
+  </script>
+</html>

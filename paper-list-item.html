@@ -1,0 +1,475 @@
+<!--
+@license
+Copyright (c) 2016 Glenn Vandeuren. All rights reserved.
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../iron-media-query/iron-media-query.html">
+<link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../iron-overlay-behavior/iron-overlay-behavior.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="paper-list-item-icons.html">
+
+<!--
+An element providing a list-item  'à la material design'.
+
+Example:
+
+    <paper-list-item></paper-list-item>
+
+@group Paper Elements
+@element paper-list-item
+@demo demo/index.html
+@hero hero.svg
+-->
+<dom-module id="paper-list-item">
+
+  <template>
+    <style>
+      :host {
+        background: #FFF;
+        box-sizing: border-box;
+        box-shadow: 0 -1px 0 #e5e5e5,0 0 2px rgba(0,0,0,.12),0 2px 4px rgba(0,0,0,.24);
+        line-height: 1.5;
+        cursor: pointer;
+        margin: 1px 0;
+        outline: none;
+        will-change: transform,-webkit-transform;
+        min-width: 300px;
+        max-width: 1200px;
+      }
+
+      :host:not(opened) {
+        display: block !important;
+      }
+
+       :host, :host[large-screen] .layout-wrapper {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      :host[dropdown-opened] {
+        @apply(--layout-vertical);
+        width: 100%;
+      }
+
+      .horizontal {
+        width: 100%;
+        box-sizing: border-box;
+        @apply(--layout-horizontal);
+      }
+
+      .vertical {
+        width: 100%;
+        box-sizing: border-box;
+        @apply(--layout-vertical);
+      }
+
+      .header-container {
+        padding: 12px 16px;
+      }
+
+      .layout-wrapper {
+        width: 100%;
+      }
+
+      .icon-wrapper {
+        display: flex;
+        /*width: 56px;*/
+        padding-right: 32px;
+        height: 24px;
+      }
+
+      iron-icon {
+        width: 24px;
+        height: 24px;
+        position: relative;
+      }
+
+      #icon {
+        padding-right: 36px;
+      }
+
+      iron-icon.dropdown-trigger {
+        padding-left: 8px;
+      }
+
+      span.title {
+        display: inline-block;
+        width: 184px;
+        /*@apply(--paper-font-common);*/
+        font-weight: 800;
+        color: #212121;
+      }
+
+      div.text-wrapper {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        width: 100%;
+      }
+
+      span.text {
+        @apply(--layout-flex);
+        min-width: 0;
+        width: 0;
+        color: #212121;
+        font-weight: 800;
+        overflow: hidden;
+        word-wrap: break-word;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      :host[dropdown-opened] .dropdown-content-container span.text {
+        white-space: normal;
+      }
+
+      .buttons-wrapper > ::content .buttons {
+        padding-left: 16px;
+      }
+
+      .content-wrapper {
+        @apply(--layout-flex);
+        left: 50px;
+        padding: 8px 16px 0 0;
+        position: relative;
+      }
+
+      .flex {
+        @apply(--layout-flex);
+      }
+
+      :host:not([dropdown-opened]) .overlay {
+        visibility: hidden;
+      }
+
+      /*:host[dropdown-opened] .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: rgba(0, 0, 0, .24);
+        visibility: visible;
+      }*/
+
+      .ib {
+        display: inline-block;
+      }
+
+      .dropdown-content-container {
+        padding: 16px 16px 24px 72px;
+      }
+
+      .border {
+        width: 100%;
+        border-bottom: 1px solid rgba(0,0,0,.24);
+      }
+    </style>
+    <iron-media-query query="[[query]]" query-matches="{{largeScreen}}"></iron-media-query>
+    <div class="overlay"></div>
+
+    <!-- TODO: add second row and ripple animations -->
+    <!-- <div class="icon-wrapper"> -->
+    <!-- </div> -->
+    <div class="horizontal header-container">
+      <iron-icon id="icon" icon="[[icon]]" src="[[src]]"></iron-icon>
+      <div class="layout-wrapper">
+        <span class="title">[[title]]</span>
+        <div class="text-wrapper">
+          <template is="dom-if" if="[[_computeSubTitle(subTitle, _subTitle, dropdown, dropdownOpened, domIf)]]">
+            <span class="text" title="[[_computeTitle(title, _ellipsedText)]]">[[_computeSubTitle(subTitle, _subTitle, dropdown)]]</span>
+          </template>
+        </div>
+      </div>
+
+      <template is="dom-if" if="[[dropdown]]" restamp="[[restamp]]">
+        <iron-icon icon="paper-list-item-icons:arrow-drop-down" hidden$="[[_computeDropDown(dropdownOpened, dropdown)]]" class="dropdown-trigger"></iron-icon>
+        <iron-icon icon="paper-list-item-icons:arrow-drop-up" hidden$="[[_computeDropUp(dropdownOpened, dropdown)]]" class="dropdown-trigger"></iron-icon>
+      </template>
+      <!-- <span class="flex"></span> -->
+      <div class="buttons-wrapper">
+        <content select=".buttons"></content>
+      </div>
+    </div>
+
+
+    <template is="dom-if" if="[[_computeDropDownOpened(dropdownOpened, dropdown)]]">
+      <div class="vertical">
+        <div class="border"></div>
+        <div class="dropdown-content-container">
+          <div class="layout-wrapper">
+            <content select=".dropdown-content"></content>
+            <div class="text-wrapper">
+              <span class="text">[[text]]</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </template>
+    <!-- <template is="dom-if" if="[[_computeExtraImages(images)]]" restamp="[[restamp]]">
+      <content select=".second-row"></content>
+    </template> -->
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+    is: 'paper-list-item',
+    behaviors: [Polymer.IronResizableBehavior, Polymer.IronOverlayBehavior],
+
+    properties: {
+
+      /**
+       * The title
+       */
+      title: String,
+
+      /**
+       * The subTitle
+       */
+      subTitle: {
+        type: String,
+        value: null
+      },
+
+      /**
+       * The subTitle
+       */
+      _subTitle: {
+        type: String,
+        value: null
+      },
+
+      /**
+       * text
+       */
+      text: String,
+
+      /**
+       * The icon
+       */
+      icon: String,
+
+      /**
+       * The src
+       */
+      src: String,
+
+      /**
+       * Describes the images
+       *
+       * @type {[{name: string, alt: string, src: string}]}
+       */
+      images: {
+        type: Object,
+        value: function() {
+          return [];
+        }
+      },
+
+      query: {
+        type: String,
+        value: 'min-width: 640px'
+      },
+
+      /**
+       * when true shows the big screen layout
+       */
+      largeScreen: {
+        type: Boolean,
+        reflectToAttribute: true
+      },
+
+      opened: {
+        type: Boolean,
+        reflectToAttribute: true,
+        value: false
+      },
+
+      dropdownOpened: {
+        type: Boolean,
+        reflectToAttribute: true,
+        value: false
+      },
+
+      dropdown: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * When true, restamps the template(s).
+       */
+      restamp: {
+        type: Boolean,
+        value: false
+      },
+
+      domIf: {
+        type: Boolean,
+        value: true
+      },
+
+      _clientRect: {
+        type: Object,
+        value: {},
+        readOnly: true
+      },
+
+      _ellipsedText: {
+        type: String,
+        value: null
+      },
+
+      withBackdrop: {
+        type: Boolean,
+        value: false
+      },
+
+      buttonTrigger: {
+        type: String,
+        value: 'list-item-button'
+      },
+
+      dropdownTrigger: {
+        type: String,
+        value: 'dropdown-trigger'
+      },
+
+      openTrigger: {
+        type: String,
+        value: function() {
+          return {
+            target: this,
+            value: 'open-trigger'
+          };
+        }
+      }
+
+    },
+
+    listeners: {
+      'iron-resize': '_onResize',
+      'tap': '_tapHandler'
+    },
+
+    observers: [
+      '_setTextContent(text, _clientRect)',
+      '_setupBackdrop(withBackdrop, openTrigger)'
+    ],
+
+    get __subTitle() {
+      return this.subTitle;
+    },
+
+    _onResize: function(event) {
+      var itemContent = this.querySelector('.item-content');
+      if (itemContent) {
+        this._set_clientRect(this.getBoundingClientRect());
+      }
+      this._set_clientRect(this.getBoundingClientRect());
+    },
+
+    _setupBackdrop: function(enabled, trigger) {
+      if (enabled && trigger) {
+        trigger.target.classList.add(trigger.value);
+      }
+    },
+
+    _tapHandler: function(event) {
+      var rootTarget = Polymer.dom(event).rootTarget;
+      var hasDropdownTrigger = rootTarget.classList.contains(this.dropdownTrigger);
+      var hasButtonTrigger = rootTarget.classList.contains(this.buttonTrigger);
+      if (this.withBackdrop && !hasDropdownTrigger && !hasButtonTrigger) {
+        this.toggleOpened();
+      } else if (this.dropdown && hasDropdownTrigger && !hasButtonTrigger) {
+        this.toggleDropdown();
+      }
+    },
+
+    _setTextContent: function(text, client) {
+      var subTitle = this.__subTitle;
+      if (text.length > (client.width / 6.5)) {
+        if (subTitle === null) {
+          this._subTitle = text.slice(0, client.width / 6.5).concat('...');
+        }
+        this._ellipsedText = text.slice(client.width / 6.5);
+        this.dropdown = true;
+      } else {
+        if (subTitle === null) {
+          this._subTitle = text;
+        }
+        this._ellipsedText = null;
+        if (text !== subTitle && subTitle !== null) {
+          this.dropdown = true;
+        } else {
+          this.dropdown = false;
+        }
+      }
+    },
+
+    toggleDropdown: function() {
+      this.dropdownOpened = !this.dropdownOpened;
+    },
+
+    toggleOpened: function() {
+      this.opened = !this.opened;
+    },
+
+    _computeDropDownOpened: function(opened, enabled) {
+      if (enabled && opened) {
+        return true;
+      }
+      return false;
+    },
+
+    _computeDropDown: function(opened, enabled) {
+      if (!enabled) {
+        return true;
+      }
+      if (enabled && opened) {
+        return true;
+      }
+      return false;
+    },
+
+    _computeDropUp: function(opened, enabled) {
+      if (!enabled) {
+        return true;
+      }
+      if (opened) {
+        return false;
+      }
+      return true;
+    },
+
+    _computeTitle: function(title, ellipsis) {
+      if (ellipsis) {
+        return ellipsis;
+      }
+      return title;
+    },
+
+    _computeSubTitle: function(subTitle, _subTitle, dropdown, dropdownOpened, domIf) {
+      var i = domIf ? domIf : false;
+      if (i && dropdown && _subTitle && dropdownOpened) {
+        return false;
+      } else {
+        return subTitle ? subTitle : _subTitle;
+      }
+    }//,
+
+    // action: function(arg) {
+      // if (arg) {
+        // return this.fire('paper-list-item-action', arg ? arg : false);
+      // }
+    // }
+
+  });
+
+</script>
